@@ -1,0 +1,29 @@
+package bookonline.dto.response;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class PaymentResponse {
+	String paymentId;
+	String username;
+	String userRole;
+	String vipId;
+	String content;
+	String status;
+	double amount;
+	LocalDateTime createdTime;
+	LocalDateTime paidTime;
+	
+}
