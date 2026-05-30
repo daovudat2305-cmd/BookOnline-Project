@@ -37,30 +37,24 @@ public class SecurityConfig {
 			"/auth/signin",
 	};
 
-    /**
-     * Cấu hình CORS toàn cục cho Spring Security
-     */
+	
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // cho phép Frontend ở cổng 5500 gọi sang (Thêm cả localhost và 127.0.0.1)
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:5500", 
             "http://127.0.0.1:5500",
             "http://localhost:5173"
         ));
         
-        // cho phép các phương thức (GET, POST,...)
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         
-        // cho phép tất cả các Header (quan trọng để Frontend gửi được header Authorization chứa Token)
+        
         configuration.setAllowedHeaders(List.of("*"));
         
-        // (Tùy chọn) Cho phép gửi thông tin xác thực như Cookie (nếu cần)
         configuration.setAllowCredentials(true);
 
-        // Áp dụng cấu hình này cho TẤT CẢ CÁC ĐƯỜNG DẪN ("/**")
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); 
         return source;
@@ -71,10 +65,8 @@ public class SecurityConfig {
 		
 		httpSecurity.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 		
-		//vô hiệu hóa bảo vệ csrf
 		httpSecurity.csrf(AbstractHttpConfigurer::disable);
 		
-		//cấu hình session thành stateless
 		httpSecurity.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 		
 		//phân quyền
@@ -94,13 +86,11 @@ public class SecurityConfig {
 		return httpSecurity.build();
 	}
 	
-	// dang ki password encoder de ma hoa mat khau
 	@Bean
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder(10);
 	}
 
-    // Bean để quản lý xác thực
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

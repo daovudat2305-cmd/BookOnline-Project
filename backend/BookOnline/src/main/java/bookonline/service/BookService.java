@@ -20,6 +20,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,25 +50,24 @@ public class BookService {
     @Autowired private UserRepository userRepository;
     @Autowired private RecommendationService recommendationService;
     
-    // 1. Lấy danh sách sách đang CHỜ DUYỆT (status = 0)
+    
     public List<Book> getPendingBooks() {
         return bookRepository.findByStatus(0);
     }
 
-    // 2. Lấy danh sách sách ĐÃ DUYỆT (status = 1)
+    
     public List<Book> getApprovedBooks() {
         return bookRepository.findByStatus(1);
     }
 
-    // 3. Hành động DUYỆT SÁCH (Đổi status thành 1)
+    
     public Book approveBook(String bookId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sách có ID: " + bookId));
         
         book.setStatus(1);
-        book.setMessage(null); // Xóa lời nhắn cũ nếu có khi duyệt lại
+        book.setMessage(null);
         
-        //lưu vào bookearning để tính tiền
         if(book.getType().equalsIgnoreCase("VIP")) {
         	BookEarning bookEarning = BookEarning.builder()
         			.authorId(book.getAuthorId())
@@ -81,17 +81,17 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    // 4. Hành động TỪ CHỐI SÁCH (Đổi status thành 2 và lưu lý do)
+    
     public Book rejectBook(String bookId, String reason) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sách có ID: " + bookId));
         
         book.setStatus(2);
-        book.setMessage(reason); // Lưu lý do từ chối
+        book.setMessage(reason);
         return bookRepository.save(book);
     }
 
-    // 5.ĐĂNG SÁCH MỚI
+    
     @Transactional 
     public Book createBook(String title, String description, String authorId, String authorName, 
                            String type, Integer totalPages, 
@@ -109,10 +109,10 @@ public class BookService {
                 .description(description)
                 .authorId(authorId)
                 .authorName(authorName)
-                .type(type) // "FREE" hoặc "VIP"
+                .type(type)
                 .fileUrl(pdfUrl) 
                 .coverImage(coverUrl) 
-                .status(0) // Mặc định vừa đăng là 0 (Chờ duyệt)
+                .status(0)
                 .totalPages(totalPages)
                 .viewCount(0) 
                 .createdAt(LocalDate.now()) 
@@ -129,7 +129,7 @@ public class BookService {
         return savedBook;
     }
     
-    // 6. Hành động XÓA SÁCH (Soft delete: Chuyển status sang 3 và lưu lý do xóa)
+    
     public void deleteBookWithReason(String bookId, String reason) {
         try {
             Book book = bookRepository.findById(bookId)
@@ -146,30 +146,30 @@ public class BookService {
         }
     }
 
-    // 7. Hàm lấy sách theo tác giả (phục vụ phần lịch sử)
+    
     public List<Book> getBooksByAuthorId(String authorId) {
         return bookRepository.findByAuthorId(authorId);
     }
-    // 8.Lấy chi tiết 1 cuốn sách (Phục vụ trang chủ và người dùng đọc sách)
+    
     public Book getBookById(String bookId) {
         return bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy cuốn sách có ID: " + bookId));
     }
 
-    // 9. Lọc sách theo nhiều điều kiện kết hợp phân trang
+    
     public Page<Book> filterBooks(String keyword, String categories, String type, Integer status, int page, int size, String sort) {
-        // 1. Xử lý sắp xếp (JS gửi lên 'newest' hoặc 'oldest')
-    	org.springframework.data.domain.Sort sortOrder = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt")
-    	        .and(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "bookId")); 
+    	
+    	Sort sortOrder = Sort.by(Sort.Direction.DESC, "createdAt")
+    	        .and(Sort.by(Sort.Direction.DESC, "bookId")); 
 
     	if ("oldest".equalsIgnoreCase(sort)) {
-    	    sortOrder = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.ASC, "createdAt")
-    	            .and(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.ASC, "bookId"));
+    	    sortOrder = Sort.by(Sort.Direction.ASC, "createdAt")
+    	            .and(Sort.by(Sort.Direction.ASC, "bookId"));
     	}
 
         Pageable pageable = PageRequest.of(page, size, sortOrder);
 
-        // 2. Xử lý danh sách thể loại từ String "1,2" thành List<Integer> [1, 2]
+       	
         List<Integer> categoryIdList = null;
         if (categories != null && !categories.trim().isEmpty()) {
             categoryIdList = new ArrayList<>();
@@ -178,17 +178,17 @@ public class BookService {
                 try {
                     categoryIdList.add(Integer.parseInt(cat.trim()));
                 } catch (NumberFormatException e) {
-                    // Bỏ qua nếu ID không phải là số hợp lệ
+                    
                 }
             }
             if (categoryIdList.isEmpty()) categoryIdList = null; 
         }
 
-        // 3. Xử lý từ khóa và loại truyện (ALL thì gán bằng null để lấy hết)
+        
         if (keyword != null && keyword.trim().isEmpty()) keyword = null;
         if (type != null && (type.trim().isEmpty() || type.equalsIgnoreCase("ALL"))) type = null;
 
-        // 4. Gọi xuống Repository vừa viết
+        
         return bookRepository.filterBooks(keyword, categoryIdList, type, status, pageable);
     }
     
@@ -220,7 +220,7 @@ public class BookService {
     	return response;
     }
     
-    //lấy sách đăng bởi tác giả (đã được duyệt) để admin xem trong thống kê
+    
     public List<Book> getBookByAuthorName(String authorName) {
     	return bookRepository.findByAuthorNameAndStatus(authorName, 1);
     }
@@ -263,17 +263,15 @@ public class BookService {
         List<Book> shallowReadBooks = bookRepository.findAllById(readShallowlyIds);
         List<Book> cmtBooks = bookRepository.findAllById(cmtIds);
 
-        // gọi GROQ AI (Reranking)
+        // gọi GROQ AI
         List<String> aiRecommendedIds = recommendationService.getAiRecommendedBookIds(
                 favBooks, deepReadBooks, shallowReadBooks, cmtBooks, candidateBooks
         );
 
         // xử lý kết quả tra về
         if (aiRecommendedIds != null && !aiRecommendedIds.isEmpty()) {
-            // Lấy sách từ DB dựa trên list ID mà AI đã chốt
             List<Book> finalBooks = bookRepository.findAllById(aiRecommendedIds);
             
-            //lấy sách theo thứ tự trả về
             return aiRecommendedIds.stream()
                     .map(id -> finalBooks.stream()
                                .filter(b -> b.getBookId().equals(id))
@@ -282,7 +280,7 @@ public class BookService {
                     .toList();
         }
 
-        System.out.println("⚠️ Groq AI không trả về kết quả, dùng fallback SQL.");
+        System.out.println("Groq AI không trả về kết quả, dùng fallback SQL.");
         return candidateBooks.stream().limit(10).toList();
     }
     

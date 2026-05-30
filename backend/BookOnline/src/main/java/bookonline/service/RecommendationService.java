@@ -84,10 +84,8 @@ public class RecommendationService {
             
             logRequest(systemPrompt, userContext, candidatesList, jsonResult);
             
-            // lọc bỏ markdown block nếu Groq vô tình trả về ```json ... ```
             jsonResult = jsonResult.replace("```json", "").replace("```", "").trim();
-
-            // dùng Jackson ObjectMapper để parse chuỗi JSON thành List<String>
+            
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(jsonResult, new TypeReference<List<String>>(){});
 

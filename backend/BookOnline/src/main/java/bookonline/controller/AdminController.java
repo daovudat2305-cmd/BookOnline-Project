@@ -26,7 +26,6 @@ public class AdminController {
 	@Autowired private PaymentService paymentService;
 	@Autowired private PaymentRequestService paymentRequestService;
 	
-	//danh sách đơn đăng ký
 	@GetMapping("/author-request")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> getAllRequests(
@@ -35,7 +34,6 @@ public class AdminController {
 		return ResponseEntity.ok().body(authorService.getAllRequests(page,size));
 	}
 	
-	//tìm kiếm đơn đăng ký
 	@GetMapping("/author-request/{keyword}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> searchRequestsByAuthorName(

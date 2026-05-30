@@ -88,7 +88,6 @@ public class UserService {
 		boolean isVip = false;
 		if(userVip!=null) {
 			if (userVip.getEndDate().isBefore(LocalDateTime.now())) {
-		        // Nếu ngày kết thúc nằm TRƯỚC hiện tại -> Đã hết hạn
 		        userVipRepository.delete(userVip);
 		    }
 			else {

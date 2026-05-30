@@ -10,7 +10,7 @@ import lombok.Data;
 public class GroqRequest {
     private String model;
     private List<Message> messages;
-    private double temperature; // Để 0.1 để AI bớt sáng tạo, trả kết quả chuẩn JSON
+    private double temperature;
     
     @Data 
     @AllArgsConstructor

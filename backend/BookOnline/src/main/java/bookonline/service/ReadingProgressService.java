@@ -28,7 +28,6 @@ public class ReadingProgressService {
     private final BookRepository bookRepository;
     private final CacheWarmingService cacheWarmingService;
 
-    // 1. HÀM LƯU LỊCH SỬ (Gọi ngay khi bấm nút "Đọc ngay")
     @Transactional
     public void saveOrUpdateProgress(String username, String bookId, Integer currentPage) {
         User user = userRepository.findByUsername(username);
@@ -41,7 +40,6 @@ public class ReadingProgressService {
         
         int totalPages = (book.getTotalPages() != null && book.getTotalPages() > 0) ? book.getTotalPages() : 1;
         
-        // Nếu số trang user gửi lên mà lớn hơn tổng số trang thực tế
         if (currentPage != null && currentPage > totalPages) {
             currentPage = totalPages;
         }
@@ -66,7 +64,7 @@ public class ReadingProgressService {
         }
     }
 
-    // 2. HÀM TĂNG LƯỢT ĐỌC (Gọi sau khi user ở lại 10 giây)
+    
     @Transactional
     public void incrementBookView(String bookId) {
         Book book = bookRepository.findById(bookId)
@@ -79,7 +77,7 @@ public class ReadingProgressService {
         bookRepository.save(book);
     }
 
-    // 3. Hàm lấy danh sách Lịch sử đọc
+    
     public Page<ReadingProgress> getUserReadingHistory(String username, int page, int size) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
@@ -91,7 +89,7 @@ public class ReadingProgressService {
         return progressRepository.findByUser_UserIdOrderByLastTimeReadDesc(realUserId, pageable);
     }
 
-    // 4. HÀM CỘNG DỒN THỜI GIAN ĐỌC (TÍNH BẰNG GIÂY)
+    
     @Transactional
     public void addReadingTime(String username, String bookId, Long secondsToAdd) {
         User user = userRepository.findByUsername(username);

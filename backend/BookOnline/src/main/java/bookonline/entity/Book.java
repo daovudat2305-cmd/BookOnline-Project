@@ -27,10 +27,8 @@ public class Book {
     
     private String type;
     
-    @Column(name = "fileUrl")
     private String fileUrl;
     
-    @Column(name = "coverImage")
     private String coverImage;
     
     /**
@@ -42,23 +40,17 @@ public class Book {
      */
     private Integer status; 
     
-    // Lưu lý do từ chối hoặc lý do xóa từ Admin
     @Column(name = "message", columnDefinition = "TEXT")
     private String message;
     
-    @Column(name = "totalPages")
     private Integer totalPages;
     
-    @Column(name = "viewCount")
     private Integer viewCount;
     
-    @Column(name = "createdAt")
     private LocalDate createdAt;
     
-    @Column(name = "authorName")
     private String authorName;
 
-    // KẾT NỐI VỚI BẢNG THỂ LOẠI
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "book_category", 

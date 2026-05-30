@@ -20,22 +20,18 @@ public interface BookRepository extends JpaRepository<Book, String> {
 	@EntityGraph(attributePaths = {"categories"})
     Book findByBookId(String bookId);
 
-    // 1. Tìm tất cả sách theo trạng thái (0: Chờ duyệt, 1: Đã duyệt, 2: Từ chối, 3: Đã xóa)
 	@EntityGraph(attributePaths = {"categories"})
     List<Book> findByStatus(Integer status);
 
-    // 2. Tìm danh sách sách của một tác giả cụ thể (phục vụ phần Lịch sử đăng sách)
 	@EntityGraph(attributePaths = {"categories"})
     List<Book> findByAuthorId(String authorId);
 
-    // 3. Lưu nhiều thể loại cho 1 cuốn sách (Native Query để chèn vào bảng trung gian)
     @Modifying
     @Transactional
     @Query(value = "INSERT INTO book_category (bookId, categoryId) VALUES (:bookId, :categoryId)", nativeQuery = true)
     void insertBookCategory(@Param("bookId") String bookId, @Param("categoryId") Integer categoryId);
 
 
-    // Lọc sách kết hợp phân trang cho trang chủ / trang thể loại
     @EntityGraph(attributePaths = {"categories"})
     @Query("SELECT DISTINCT b FROM Book b " +
             "LEFT JOIN b.categories c " +
@@ -72,7 +68,6 @@ public interface BookRepository extends JpaRepository<Book, String> {
             """, nativeQuery = true)
     List<Book> findTop10BooksSortedByRating();
     
-    //danh sách thể loại theo bookId
     @Query(value = """
             SELECT c.categoryName 
             FROM category c 
@@ -81,11 +76,9 @@ public interface BookRepository extends JpaRepository<Book, String> {
             """, nativeQuery = true)
     List<String> findCategoryNamesByBookId(@Param("bookId") String bookId);
     
-    //tìm theo tác giả và trạng thái đã duyệt
     List<Book> findByAuthorNameAndStatus(String authorName, Integer status);
     
     // đề xuất sách
-    //tìm categoryId theo bookId
     @Query(value = """
             SELECT c.categoryId
             FROM category c

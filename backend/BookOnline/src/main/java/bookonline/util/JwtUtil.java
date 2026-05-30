@@ -32,10 +32,8 @@ public class JwtUtil {
     JwtUtil(BookOnlineApplication bookOnlineApplication) {
         this.bookOnlineApplication = bookOnlineApplication;
     }
-	
-	// ham tao Token	
+		
 	public String generateToken(User user) {
-		// thuat toan HS512
 		JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 		
 		//de build payload can claims, trong do co 1 claim la username
@@ -63,35 +61,29 @@ public class JwtUtil {
 		}
 	}
 	
-	//ham kiem tra tinh hop le cua token
 	public boolean validateToken(String token) {
 		try {
 			SignedJWT signedJWT = SignedJWT.parse(token);
-		
-			// tao verifier de kiem tra chu ky voi khoa bi mat
 			JWSVerifier verifier = new MACVerifier(SINGER_KEY.getBytes());
 			
 			//kiem tra chu ky
 			boolean isSignatureValid = signedJWT.verify(verifier);
 			
-			//kiem tra thoi gian het han
 			Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 			boolean isTokenExpired = expirationTime.before(new Date());
 			
 			return isSignatureValid && !isTokenExpired;
 		} catch (ParseException | JOSEException e) {
-			return false; //token sai dinh dang hoac loi
+			return false;
 		}
 		
 	}
 	
-	// lấy username từ token
 	public String extractUsername(String token) throws ParseException {
 		SignedJWT signedJWT = SignedJWT.parse(token);
 		return signedJWT.getJWTClaimsSet().getSubject();
 	}
 	
-	// lấy scope(quyền) từ token
 	public String extractScope(String token) throws ParseException {
 		SignedJWT signedJWT = SignedJWT.parse(token);
 		return signedJWT.getJWTClaimsSet().getStringClaim("scope");

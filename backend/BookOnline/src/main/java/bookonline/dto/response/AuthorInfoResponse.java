@@ -23,6 +23,4 @@ public class AuthorInfoResponse {
 	String gender;
 	LocalDate dob;
 	String bankAccount;
-	
-	//List<Book>
 }

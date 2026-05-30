@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,7 +38,6 @@ public class AuthorBookController {
             @RequestParam("categoryIds") List<Integer> categoryIds
     ) {
         
-        // 1. Kiểm tra rỗng
         if (title == null || title.trim().isEmpty() || description == null || description.trim().isEmpty()) {
             throw new RuntimeException("Vui lòng điền đầy đủ thông tin chữ của cuốn sách!");
         }
@@ -47,7 +47,6 @@ public class AuthorBookController {
         }
 
         try {
-            // 2. Lấy thông tin Tác giả từ Token bảo mật
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName(); 
             
@@ -57,11 +56,9 @@ public class AuthorBookController {
                 throw new RuntimeException("Không xác định được danh tính tác giả!");
             }
 
-            // Lấy ID và Username.
             String authorId = user.getUserId(); 
             String authorName = user.getUsername(); 
 
-            // 3. Gọi Service để lưu
             Book savedBook = bookService.createBook(
                     title, description, authorId, authorName, type, totalPages, coverImage, pdfFile, categoryIds
             );
@@ -73,22 +70,18 @@ public class AuthorBookController {
             throw new RuntimeException("Lỗi khi lưu sách vào hệ thống: " + e.getMessage());
         }
     }
- // LẤY LỊCH SỬ ĐĂNG SÁCH
-    @org.springframework.web.bind.annotation.GetMapping("/my-history")
+ 
+    @GetMapping("/my-history")
     public ResponseEntity<?> getMyBookHistory() {
         try {
-            // 1. Lấy username từ Token
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
             
-            // 2. Tìm User
             User user = userRepository.findByUsername(username);
             if (user == null) {
                 return ResponseEntity.status(401).body("Không xác định được danh tính!");
             }
 
-            // 3. Gọi Service để lấy danh sách sách theo authorId
-            // Giả sử trong BookService đã có hàm findByAuthorId
             List<Book> myBooks = bookService.getBooksByAuthorId(user.getUserId());
             
             return ResponseEntity.ok(myBooks);

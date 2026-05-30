@@ -22,8 +22,6 @@ public class ReadingProgressController {
 
     private final ReadingProgressService progressService;
 
-    // 1. API: LƯU HOẶC CẬP NHẬT LỊCH SỬ ĐỌC
-    // Sẽ được gọi ngầm mỗi khi user lật trang hoặc bấm "Đọc sách"
     @PostMapping("/update")
     public ResponseEntity<?> updateProgress(
             @RequestParam("bookId") String bookId,
@@ -35,7 +33,6 @@ public class ReadingProgressController {
                 return ResponseEntity.status(401).body("Vui lòng đăng nhập!");
             }
             
-            // Lấy ID người dùng từ Token đăng nhập
             String userId = principal.getName(); 
             
             progressService.saveOrUpdateProgress(userId, bookId, currentPage);
@@ -46,7 +43,7 @@ public class ReadingProgressController {
         }
     }
 
-    // API MỚI: TĂNG LƯỢT ĐỌC (Sẽ được gọi từ Frontend sau khi user ở lại trang 10 giây)
+   	
     @PostMapping("/{bookId}/increment-view")
     public ResponseEntity<?> incrementView(@PathVariable("bookId") String bookId) {
         try {
@@ -58,8 +55,6 @@ public class ReadingProgressController {
     }
 
 
-    // API CỘNG DỒN THỜI GIAN ĐỌC
-
     @PostMapping("/{bookId}/add-time")
     public ResponseEntity<?> addReadingTime(
             @PathVariable("bookId") String bookId,
@@ -70,10 +65,8 @@ public class ReadingProgressController {
                 return ResponseEntity.status(401).body("Vui lòng đăng nhập!");
             }
             
-            // Lấy username (userId) từ Token
             String userId = principal.getName();
             
-            // Gọi Service để cộng dồn số giây
             progressService.addReadingTime(userId, bookId, seconds);
             
             return ResponseEntity.ok("Đã cộng thời gian đọc thành công!");
@@ -82,8 +75,7 @@ public class ReadingProgressController {
         }
     }
 
-
-    // 2. API: LẤY DANH SÁCH LỊCH SỬ ĐỌC
+    
     @GetMapping("/list")
     public ResponseEntity<?> getReadingHistory(
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -94,8 +86,7 @@ public class ReadingProgressController {
             if (principal == null) {
                 return ResponseEntity.status(401).body("Vui lòng đăng nhập!");
             }
-
-            // Lấy ID người dùng từ Token đăng nhập
+            
             String userId = principal.getName();
             
             Page<ReadingProgress> history = progressService.getUserReadingHistory(userId, page, size);
